@@ -54,6 +54,24 @@ from .utils.checkpointing import get_latest_ckpt_path_to_resume_from, get_interm
 logger = get_logger("finetrainers")
 logger.setLevel(FINETRAINERS_LOG_LEVEL)
 
+def collate_fn(batch):
+    latent_conditions = [x["latent_conditions"] for x in batch]
+    text_conditions = [x["text_conditions"] for x in batch]
+    batched_latent_conditions = {}
+    batched_text_conditions = {}
+    for key in list(latent_conditions[0].keys()):
+        if torch.is_tensor(latent_conditions[0][key]):
+            batched_latent_conditions[key] = torch.cat([x[key] for x in latent_conditions], dim=0)
+        else:
+            # TODO(aryan): implement batch sampler for precomputed latents
+            batched_latent_conditions[key] = [x[key] for x in latent_conditions][0]
+    for key in list(text_conditions[0].keys()):
+        if torch.is_tensor(text_conditions[0][key]):
+            batched_text_conditions[key] = torch.cat([x[key] for x in text_conditions], dim=0)
+        else:
+            # TODO(aryan): implement batch sampler for precomputed latents
+            batched_text_conditions[key] = [x[key] for x in text_conditions][0]
+    return {"latent_conditions": batched_latent_conditions, "text_conditions": batched_text_conditions}
 
 class Trainer:
     def __init__(self, args: Args) -> None:
@@ -182,25 +200,6 @@ class Trainer:
 
         if self.args.batch_size != 1:
             raise ValueError("Precomputation is only supported with batch size 1. This will be supported in future.")
-
-        def collate_fn(batch):
-            latent_conditions = [x["latent_conditions"] for x in batch]
-            text_conditions = [x["text_conditions"] for x in batch]
-            batched_latent_conditions = {}
-            batched_text_conditions = {}
-            for key in list(latent_conditions[0].keys()):
-                if torch.is_tensor(latent_conditions[0][key]):
-                    batched_latent_conditions[key] = torch.cat([x[key] for x in latent_conditions], dim=0)
-                else:
-                    # TODO(aryan): implement batch sampler for precomputed latents
-                    batched_latent_conditions[key] = [x[key] for x in latent_conditions][0]
-            for key in list(text_conditions[0].keys()):
-                if torch.is_tensor(text_conditions[0][key]):
-                    batched_text_conditions[key] = torch.cat([x[key] for x in text_conditions], dim=0)
-                else:
-                    # TODO(aryan): implement batch sampler for precomputed latents
-                    batched_text_conditions[key] = [x[key] for x in text_conditions][0]
-            return {"latent_conditions": batched_latent_conditions, "text_conditions": batched_text_conditions}
 
         should_precompute = should_perform_precomputation(self.args.data_root)
         if not should_precompute:

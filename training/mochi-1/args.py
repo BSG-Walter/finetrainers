@@ -153,7 +153,7 @@ def _get_training_args(parser: argparse.ArgumentParser) -> None:
         "--target_modules",
         nargs="+",
         type=str,
-        default=["to_k", "to_q", "to_v", "to_out.0"],
+        default=["to_k", "to_q", "to_v", "to_out.0", "ff.net.0.proj", "ff.net.2"],
         help="Target modules to train LoRA for.",
     )
     parser.add_argument(

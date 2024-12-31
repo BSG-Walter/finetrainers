@@ -67,8 +67,8 @@ class Args:
     train_epochs: int = 1
     train_steps: int = None
     rank: int = 128
-    lora_alpha: float = 64
-    target_modules: List[str] = ["to_k", "to_q", "to_v", "to_out.0"]
+    lora_alpha: float = 128
+    target_modules: List[str] = ["to_k", "to_q", "to_v", "to_out.0", "ff.net.0.proj", "ff.net.2"]
     gradient_accumulation_steps: int = 1
     gradient_checkpointing: bool = False
     checkpointing_steps: int = 500
@@ -435,7 +435,7 @@ def _add_training_arguments(parser: argparse.ArgumentParser) -> None:
         help="The lora_alpha to compute scaling factor (lora_alpha / rank) for LoRA matrices.",
     )
     parser.add_argument(
-        "--target_modules", type=str, default="to_k to_q to_v to_out.0", nargs="+", help="The target modules for LoRA."
+        "--target_modules", type=str, default="to_k to_q to_v to_out.0 ff.net.0.proj ff.net.2", nargs="+", help="The target modules for LoRA."
     )
     parser.add_argument(
         "--gradient_accumulation_steps",
