@@ -225,7 +225,7 @@ def validation(
     width: Optional[int] = None,
     num_frames: Optional[int] = None,
     frame_rate: int = 25,
-    num_videos_per_prompt: int = 1,
+    num_videos_per_prompt: int = 0,
     generator: Optional[torch.Generator] = None,
     **kwargs,
 ):
@@ -241,7 +241,9 @@ def validation(
         "output_type": "pil",
     }
     generation_kwargs = {k: v for k, v in generation_kwargs.items() if v is not None}
-    video = pipeline(**generation_kwargs).frames[0]
+    video=None
+    if num_videos_per_prompt > 1:
+        video = pipeline(**generation_kwargs).frames[0]
     return [("video", video)]
 
 

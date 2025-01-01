@@ -384,6 +384,7 @@ class Trainer:
             r=self.args.rank,
             lora_alpha=self.args.lora_alpha,
             init_lora_weights=True,
+            bias='none',
             target_modules=self.args.target_modules,
         )
         self.transformer.add_adapter(transformer_lora_config)
